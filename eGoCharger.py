@@ -1,4 +1,5 @@
 
+from enum import Enum
 import json
 import time
 import logging
@@ -9,13 +10,21 @@ import paho.mqtt.client as pahoMqtt
 from PythonLib.JsonUtil import JsonUtil
 from PythonLib.Mqtt import MQTTHandler, Mqtt
 from PythonLib.Scheduler import Scheduler
-from PythonLib.DictUtil import DictUtil
 from PythonLib.DateUtil import DateTimeUtilities
 from PythonLib.TaskQueue import TaskQueue
 
 logger = logging.getLogger('eGoCharger')
 
 # https://github.com/goecharger/go-eCharger-API-v2/blob/main/apikeys-de.md
+
+
+class GoEchargerCarStatus(Enum):
+    Unknown = 0
+    Idle = 1
+    Charging = 2
+    WaitCar = 3
+    Complete = 4
+    Error = 4
 
 
 class Module:
@@ -112,22 +121,10 @@ class eGoCharger:
             logging.exception('')
 
     def __receiveCar(self, payload: str) -> None:
+        status = GoEchargerCarStatus(int(payload))
+
         self.mqttClient.publish("data/StatusAsNumber", payload)
-        match(payload):
-            case '0':
-                self.mqttClient.publish("data/Status", "Unknown")
-            case '1':
-                self.mqttClient.publish("data/Status", "Idle")
-            case '2':
-                self.mqttClient.publish("data/Status", "Charging")
-            case '3':
-                self.mqttClient.publish("data/Status", "WaitCar")
-            case '4':
-                self.mqttClient.publish("data/Status", "Complete")
-            case '5':
-                self.mqttClient.publish("data/Status", "Error")
-            case _:
-                self.mqttClient.publish("data/Status", "Unknown")
+        self.mqttClient.publish("data/Status", status.name)
 
     def __receivePsm(self, payload: str) -> None:
         self.mqttClient.publish("data/PhaseSwitchModeAsNumber", payload)
