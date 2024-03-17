@@ -145,11 +145,11 @@ class eGoCharger:
 
         match(payload):
             case 'Auto':
-                self.mqttClient.publish("data//house/garage/go-eCharger/226305/psm/set", "0")
+                self.mqttClient.publishIndependentTopic("/house/garage/go-eCharger/226305/psm/set", "0")
             case 'Force_1':
-                self.mqttClient.publish("data//house/garage/go-eCharger/226305/psm/set", "1")
+                self.mqttClient.publishIndependentTopic("/house/garage/go-eCharger/226305/psm/set", "1")
             case 'Force_3':
-                self.mqttClient.publish("data//house/garage/go-eCharger/226305/psm/set", "3")
+                self.mqttClient.publishIndependentTopic("/house/garage/go-eCharger/226305/psm/set", "3")
             case _:
                 pass
 
@@ -169,11 +169,11 @@ class eGoCharger:
 
         match(payload):
             case 'Neutral':
-                self.mqttClient.publish("data//house/garage/go-eCharger/226305/frc/set", "0")
+                self.mqttClient.publishIndependentTopic("/house/garage/go-eCharger/226305/frc/set", "0")
             case 'Off':
-                self.mqttClient.publish("data//house/garage/go-eCharger/226305/frc/set", "1")
+                self.mqttClient.publishIndependentTopic("/house/garage/go-eCharger/226305/frc/set", "1")
             case 'On':
-                self.mqttClient.publish("data//house/garage/go-eCharger/226305/frc/set", "2")
+                self.mqttClient.publishIndependentTopic("/house/garage/go-eCharger/226305/frc/set", "2")
             case _:
                 pass
 
@@ -186,12 +186,12 @@ class eGoCharger:
                 self.mqttClient.publish("data/NextTrip", "On")
 
     def __setNextTrip(self, payload: str) -> None:
-        self.mqttClient.publish("data/ChargingEnergyLimitIfNextTrip", payload)
+
         match(payload):
             case 'On':
                 pass
             case 'Off':
-                self.mqttClient.publish('/house/garage/go-eCharger/226305/dwo/set', 'null')
+                self.mqttClient.publishIndependentTopic('/house/garage/go-eCharger/226305/dwo/set', 'null')
 
 
 def main() -> None:
