@@ -69,15 +69,15 @@ class eGoCharger:
 
         # psm	R/W	uint8	Config	phaseSwitchMode (Auto=0, Force_1=1, Force_3=2)
         self.mqttClient.subscribeIndependentTopic('/house/garage/go-eCharger/226305/psm', self.__receivePsm)
-        self.mqttClient.subscribe('set/PhaseSwitchMode[Auto,Force_1,Force_3]', self.__setPsm)
+        self.mqttClient.subscribe('control/PhaseSwitchMode[Auto,Force_1,Force_3]', self.__setPsm)
 
         # frc	R/W	uint8	Config	forceState (Neutral=0, Off=1, On=2)
         self.mqttClient.subscribeIndependentTopic('/house/garage/go-eCharger/226305/frc', self.__receiveFrc)
-        self.mqttClient.subscribe('set/ForceState[Neutral,Off,On]', self.__setFrc)
+        self.mqttClient.subscribe('control/ForceState[Neutral,Off,On]', self.__setFrc)
 
         # dwo	R/W	optional<double>	Config	charging energy limit, measured in Wh, null means disabled, not the next-trip energy
         self.mqttClient.subscribeIndependentTopic('/house/garage/go-eCharger/226305/dwo', self.__receiveDwo)
-        self.mqttClient.subscribe('set/NextTrip[On,Off]', self.__setNextTrip)
+        self.mqttClient.subscribe('control/NextTrip[On,Off]', self.__setNextTrip)
 
         self.__keepAlive()
 
@@ -88,105 +88,105 @@ class eGoCharger:
         self.mqttClient.publishIndependentTopic('/house/agents/eGoCharger/subscriptions', JsonUtil.obj2Json(self.mqttClient.getSubscriptionCatalog()))
 
     def __receiveWh(self, payload: str) -> None:
-        self.mqttClient.publish("WhSinceCarConnected", payload)
+        self.mqttClient.publish("data/WhSinceCarConnected", payload)
 
     def __receiveEto(self, payload: str) -> None:
-        self.mqttClient.publish("EnergyTotalInWh", payload)
+        self.mqttClient.publish("data/EnergyTotalInWh", payload)
 
     def __receiveRbc(self, payload: str) -> None:
-        self.mqttClient.publish("RebootCtr", payload)
+        self.mqttClient.publish("data/RebootCtr", payload)
 
     def __receiveAlw(self, payload: str) -> None:
-        self.mqttClient.publish("IsCarAllowedToCharge", payload)
+        self.mqttClient.publish("data/IsCarAllowedToCharge", payload)
 
     def __receiveNrg(self, payload: str) -> None:
         try:
             jsonVar = json.loads(payload)
 
-            self.mqttClient.publish("PowerChargingL1", jsonVar[7])
-            self.mqttClient.publish("PowerChargingL2", jsonVar[8])
-            self.mqttClient.publish("PowerChargingL3", jsonVar[9])
-            self.mqttClient.publish("PowerChargingN", jsonVar[10])
-            self.mqttClient.publish("PowerChargingTotal", jsonVar[11])
+            self.mqttClient.publish("data/PowerChargingL1", jsonVar[7])
+            self.mqttClient.publish("data/PowerChargingL2", jsonVar[8])
+            self.mqttClient.publish("data/PowerChargingL3", jsonVar[9])
+            self.mqttClient.publish("data/PowerChargingN", jsonVar[10])
+            self.mqttClient.publish("data/PowerChargingTotal", jsonVar[11])
         except BaseException:
             logging.exception('')
 
     def __receiveCar(self, payload: str) -> None:
-        self.mqttClient.publish("StatusAsNumber", payload)
+        self.mqttClient.publish("data/StatusAsNumber", payload)
         match(payload):
             case '0':
-                self.mqttClient.publish("Status", "Unknown")
+                self.mqttClient.publish("data/Status", "Unknown")
             case '1':
-                self.mqttClient.publish("Status", "Idle")
+                self.mqttClient.publish("data/Status", "Idle")
             case '2':
-                self.mqttClient.publish("Status", "Charging")
+                self.mqttClient.publish("data/Status", "Charging")
             case '3':
-                self.mqttClient.publish("Status", "WaitCar")
+                self.mqttClient.publish("data/Status", "WaitCar")
             case '4':
-                self.mqttClient.publish("Status", "Complete")
+                self.mqttClient.publish("data/Status", "Complete")
             case '5':
-                self.mqttClient.publish("Status", "Error")
+                self.mqttClient.publish("data/Status", "Error")
             case _:
-                self.mqttClient.publish("Status", "Unknown")
+                self.mqttClient.publish("data/Status", "Unknown")
 
     def __receivePsm(self, payload: str) -> None:
-        self.mqttClient.publish("PhaseSwitchModeAsNumber", payload)
+        self.mqttClient.publish("data/PhaseSwitchModeAsNumber", payload)
         match(payload):
             case '0':
-                self.mqttClient.publish("PhaseSwitchMode", "Auto")
+                self.mqttClient.publish("data/PhaseSwitchMode", "Auto")
             case '1':
-                self.mqttClient.publish("PhaseSwitchMode", "Force_1")
+                self.mqttClient.publish("data/PhaseSwitchMode", "Force_1")
             case '2':
-                self.mqttClient.publish("PhaseSwitchMode", "Force_3")
+                self.mqttClient.publish("data/PhaseSwitchMode", "Force_3")
             case _:
-                self.mqttClient.publish("PhaseSwitchMode", "Unknown")
+                self.mqttClient.publish("data/PhaseSwitchMode", "Unknown")
 
     def __setPsm(self, payload: str) -> None:
 
         match(payload):
             case 'Auto':
-                self.mqttClient.publish("/house/garage/go-eCharger/226305/psm/set", "0")
+                self.mqttClient.publish("data//house/garage/go-eCharger/226305/psm/set", "0")
             case 'Force_1':
-                self.mqttClient.publish("/house/garage/go-eCharger/226305/psm/set", "1")
+                self.mqttClient.publish("data//house/garage/go-eCharger/226305/psm/set", "1")
             case 'Force_3':
-                self.mqttClient.publish("/house/garage/go-eCharger/226305/psm/set", "3")
+                self.mqttClient.publish("data//house/garage/go-eCharger/226305/psm/set", "3")
             case _:
                 pass
 
     def __receiveFrc(self, payload: str) -> None:
-        self.mqttClient.publish("ForceStateAsNumber", payload)
+        self.mqttClient.publish("data/ForceStateAsNumber", payload)
         match(payload):
             case '0':
-                self.mqttClient.publish("ForceState", "Neutral")
+                self.mqttClient.publish("data/ForceState", "Neutral")
             case '1':
-                self.mqttClient.publish("ForceState", "Off")
+                self.mqttClient.publish("data/ForceState", "Off")
             case '2':
-                self.mqttClient.publish("ForceState", "On")
+                self.mqttClient.publish("data/ForceState", "On")
             case _:
-                self.mqttClient.publish("ForceState", "Unknown")
+                self.mqttClient.publish("data/ForceState", "Unknown")
 
     def __setFrc(self, payload: str) -> None:
 
         match(payload):
             case 'Neutral':
-                self.mqttClient.publish("/house/garage/go-eCharger/226305/frc/set", "0")
+                self.mqttClient.publish("data//house/garage/go-eCharger/226305/frc/set", "0")
             case 'Off':
-                self.mqttClient.publish("/house/garage/go-eCharger/226305/frc/set", "1")
+                self.mqttClient.publish("data//house/garage/go-eCharger/226305/frc/set", "1")
             case 'On':
-                self.mqttClient.publish("/house/garage/go-eCharger/226305/frc/set", "2")
+                self.mqttClient.publish("data//house/garage/go-eCharger/226305/frc/set", "2")
             case _:
                 pass
 
     def __receiveDwo(self, payload: str) -> None:
-        self.mqttClient.publish("ChargingEnergyLimitIfNextTrip", payload)
+        self.mqttClient.publish("data/ChargingEnergyLimitIfNextTrip", payload)
         match(payload):
             case 'null':
-                self.mqttClient.publish("NextTrip", "Off")
+                self.mqttClient.publish("data/NextTrip", "Off")
             case _:
-                self.mqttClient.publish("NextTrip", "On")
+                self.mqttClient.publish("data/NextTrip", "On")
 
     def __setNextTrip(self, payload: str) -> None:
-        self.mqttClient.publish("ChargingEnergyLimitIfNextTrip", payload)
+        self.mqttClient.publish("data/ChargingEnergyLimitIfNextTrip", payload)
         match(payload):
             case 'On':
                 pass
