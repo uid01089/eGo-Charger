@@ -88,6 +88,10 @@ class eGoCharger:
         self.mqttClient.subscribeIndependentTopic('/house/garage/go-eCharger/226305/dwo', self.__receiveDwo)
         self.mqttClient.subscribe('control/NextTrip[On,Off]', self.__setNextTrip)
 
+        # amp	R/W	uint8	Config	requestedCurrent in Ampere, used for display on LED ring and logic calculations
+        self.mqttClient.subscribeIndependentTopic('/house/garage/go-eCharger/226305/amp', self.__receiveAmp)
+        self.mqttClient.subscribe('control/Ampere', self.__setAmpere)
+
         self.__keepAlive()
 
         self.scheduler.scheduleEach(self.__keepAlive, 10000)
@@ -95,6 +99,12 @@ class eGoCharger:
     def __keepAlive(self) -> None:
         self.mqttClient.publishIndependentTopic('/house/agents/eGoCharger/heartbeat', DateTimeUtilities.getCurrentDateString())
         self.mqttClient.publishIndependentTopic('/house/agents/eGoCharger/subscriptions', JsonUtil.obj2Json(self.mqttClient.getSubscriptionCatalog()))
+
+    def __receiveAmp(self, payload: str) -> None:
+        self.mqttClient.publish("data/AmpereForLoading", payload)
+
+    def __setAmpere(self, payload: str) -> None:
+        self.mqttClient.publishIndependentTopic("/house/garage/go-eCharger/226305/amp/set", payload)
 
     def __receiveWh(self, payload: str) -> None:
         self.mqttClient.publish("data/WhSinceCarConnected", payload)
