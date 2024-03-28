@@ -56,6 +56,8 @@ class eGoCharger:
         self.scheduler = module.getScheduler()
         self.taskQueue = module.getTaskQueue()
 
+        self.statusCar = None
+
     def setup(self) -> None:
 
         # wh	R	double	Status	energy in Wh since car connected
@@ -97,6 +99,11 @@ class eGoCharger:
         self.scheduler.scheduleEach(self.__keepAlive, 10000)
 
     def __keepAlive(self) -> None:
+
+        # Update cyclically the value to have it present in Grafana
+        if self.statusCar:
+            self.__receiveCar(self.statusCar)
+
         self.mqttClient.publishIndependentTopic('/house/agents/eGoCharger/heartbeat', DateTimeUtilities.getCurrentDateString())
         self.mqttClient.publishIndependentTopic('/house/agents/eGoCharger/subscriptions', JsonUtil.obj2Json(self.mqttClient.getSubscriptionCatalog()))
 
@@ -131,9 +138,10 @@ class eGoCharger:
             logging.exception('')
 
     def __receiveCar(self, payload: str) -> None:
-        status = GoEchargerCarStatus(int(payload))
+        self.statusCar = payload
 
-        self.mqttClient.publish("data/StatusAsNumber", payload)
+        status = GoEchargerCarStatus(int(self.statusCar))
+        self.mqttClient.publish("data/StatusAsNumber", self.statusCar)
         self.mqttClient.publish("data/Status", status.name)
 
     def __receivePsm(self, payload: str) -> None:
