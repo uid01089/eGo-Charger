@@ -164,7 +164,7 @@ class eGoCharger:
             case 'Force_1':
                 self.mqttClient.publishIndependentTopic("/house/garage/go-eCharger/226305/psm/set", "1")
             case 'Force_3':
-                self.mqttClient.publishIndependentTopic("/house/garage/go-eCharger/226305/psm/set", "3")
+                self.mqttClient.publishIndependentTopic("/house/garage/go-eCharger/226305/psm/set", "2")
             case _:
                 pass
 
